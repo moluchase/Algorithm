@@ -838,6 +838,62 @@ public static ArrayList<String> Permutation(String str) {
     }
 ```
 
+##### [leetcode] 77.Combinations[组合问题]
+
+从n个里面去k个的全部可能输出
+
+基本的DFS，而且无法简化，因此就是dfs问题
+
+```java
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> lists=new ArrayList<>();
+        List<Integer> list=new ArrayList<>();
+        combinedDfs(lists,list,n,k,1);
+        return lists;
+    }
+
+    private void combinedDfs(List<List<Integer>> lists, List<Integer> list, int n, int k, int i) {
+        if(list.size()==k)lists.add(new ArrayList<>(list));
+        else {
+            while (i<=n){
+                list.add(i);
+                combinedDfs(lists,list,n,k,i+1);
+                list.remove(list.size()-1);
+                i++;
+            }
+        }
+    }
+```
+
+##### [leetcode] 78.Subsets[组合问题变种]
+
+给一个数组，列出其全部的子集
+
+实质就是77题加上for循环
+
+```java
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> lists=new ArrayList<>();
+        lists.add(new ArrayList<>());
+        List<Integer> list=new ArrayList<>();
+        for(int i=1;i<=nums.length;i++){
+            subsetsDfs(lists,list,nums,i,0);
+        }
+        return lists;
+    }
+
+    private void subsetsDfs(List<List<Integer>> lists, List<Integer> list, int[] nums, int k, int i) {
+        if(list.size()==k)lists.add(new ArrayList<>(list));
+        else {
+            for(int j=i;j<nums.length;j++){
+                list.add(nums[j]);
+                subsetsDfs(lists,list,nums,k,j+1);
+                list.remove(list.size()-1);
+            }
+        }
+    }
+```
+
 
 
 #### 1.6.2 正则
@@ -888,6 +944,168 @@ public static ArrayList<String> Permutation(String str) {
         }
     }
 ```
+
+#### 1.6.3 字符串转整形
+
+##### [leetcode] 65. Valid Number
+
+这种题目最好不要写了，剑指offer上碰到一道，这次在leetcode上又碰到这样一道，各种规则，总共1481的测试用例：
+
+```java
+    /*
+    错误案例：
+    "e6" false
+    " " false
+    ".1" true
+    "01" true
+    "3." true
+    "." false
+    "2e0" true
+    ".1." false
+    "-1." true
+    "+.8" true
+    "-." false
+    "46.e3" true
+    ".e1" false
+    "6e6.5" false
+    "-e58" false
+    "92e17440e91" false
+    "005047e+6" true
+    "56e+" true
+     */
+    public static boolean isNumber(String s) {
+        int i=0;
+        int flag=0;
+        int flag2=0;
+        int flag3=0;
+        s=s.trim();
+        if(s.length()==0)return false;
+        while (i<s.length()){
+            char c=s.charAt(i);
+            if(c>='0'&&c<='9')i++;
+            else if((i==0||(i>0&&s.charAt(i-1)=='e'))&&(c=='-'||c=='+')&&i+1<s.length()) {i++;flag2=1;}
+            else if(c=='e'&&flag3==0&&i-flag-flag2>0&&i+1<s.length()){i+=1;flag3=1;}
+            else if(c=='.'&&flag==0&&flag3==0&&((i+1==s.length()&&(i-flag2>0))||(i+1<s.length()))){i+=1;flag=1;}
+            else return false;
+        }
+        return true;
+    }
+```
+
+
+
+#### 1.6.4 子串问题
+
+##### [leetcode] 76. Minimum Window Substring【最小的窗口串】
+
+**S** = `"ADOBECODEBANC"`
+**T** = `"ABC"`
+
+Minimum window is `"BANC"`
+
+这道题要求时间复杂度为O(n)，而且需要遍历出全部满足条件的窗口，才能找出最小的窗口
+
+```
+用一个数组当字典将字符串t映射，然后用另外一个字典来记录字符串s
+先找到一个满足条件的窗口，当刚好右边满足时，对前面进行删除，直到不能删除，此时为一个满足条件的窗口
+这个窗口中的最前面的字符和最后面的字符都一定在字符串t中，我们现在删除最前面的字符，这样就不满足条件了，继续遍历，重复
+找到全部满足条件的窗口，比较，将最小的窗口的start和end记录下来
+```
+
+举个例子：
+
+S=cabwefgewcwaefgcf
+
+T=cae
+
+1. cabwe
+2. abwefgewc
+3. ewcwa
+4. cwae
+5. aefgc
+
+#### 1.6.5 杂
+
+##### [leetcode] 58. Length of Last Word
+
+输出字符串中最后一个单词的长度
+
+```java
+    /*
+    找出最后一个单词的长度，其中如果最后一个为空格，返回空格前面一个单词的长度
+    比如
+    "123 " 返回3
+    "12 3456" 返回4
+    " " 返回0
+    "" 返回0
+    我下面用的方法是通过查找下一个空格，直到找不到空格，返回前一个空格的下标
+     */
+    public static int lengthOfLastWord(String s) {
+        int pre=0,pre2=0;
+        s=s.trim();
+        while ((pre=s.indexOf(" ",pre)+1)>0)pre2=pre;
+        if(pre2<=0)pre2=0;
+        return s.substring(pre2,s.length()).length();
+    }
+```
+
+##### [leetcode] 68.Text Justification
+
+将字符串按照规律输出：给定长度L和一个字符串数组，使每一行的长度固定为L，并尽可能多得放入字符串，每个字符串之间最少有一个空格，将空格均匀分布到字符串之间，如果不能均匀分布，将剩下的空格从左往右分布到字符串间
+
+将这个问题分解为两个问题，生成这些字符串，然后均匀分配空格
+
+```java
+    /*
+    单词比maxWidth长度小
+    最后一行比较特殊，每个单词之间空一个空格即可，将空格全部放到后面
+    对最后一行的考虑，补充"#"
+    对其他行中如果只有一个单词的处理，后面补" "
+    提交错误：
+    ""，2   ： "  "
+     */
+    public static List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> list=new ArrayList<>();
+        String temp=words[0];
+        for(int i=1;i<words.length;i++){
+            if(temp.length()+words[i].length()<maxWidth) temp+="#"+words[i];
+            else {
+                list.add(temp);
+                temp=words[i];
+            }
+        }
+        while (temp.length()<maxWidth)temp+="#";//最后一行补充#
+        list.add(temp);
+        for(int i=0;i<list.size();i++){
+            temp=list.get(i);
+            temp=i<list.size()-1?getJustif(temp,maxWidth):temp.replace("#"," ");
+            list.remove(i);
+            list.add(i,temp);
+        }
+        return list;
+    }
+
+    private static String getJustif(String temp, int maxWidth) {
+        String[] strs=temp.split("#");
+        if (strs.length==1){
+            while (temp.length()<maxWidth)temp+=" ";
+            return temp;
+        }
+        int spit=(maxWidth-(temp.length()-strs.length+1))/(strs.length-1);
+        int last=(maxWidth-(temp.length()-strs.length+1))%(strs.length-1);
+        int count;
+        temp=strs[0];
+        for(int i=1;i<strs.length;i++){
+            if(last-->0)temp+=" ";
+            count=spit;
+            while (count-->0)temp+=" ";
+            temp+=strs[i];
+        }
+        return temp;
+    }
+```
+
+
 
 
 
@@ -1404,6 +1622,50 @@ public ListNode getCommon(ListNode h1,ListNode h2,int num){
 
 先用二分查找找到指定的数字，然后从该数字的下标开始，向左向右遍历，知道不等于该数字停止，记录出现的次数，返回num
 
+##### [leetcode] 69. Sqrt(x)
+
+二分查找
+
+```java
+    public int mySqrt(int x) {
+        if(x==0) return 0;
+        int left=1;
+        int right=x;
+        int mid;
+        while (true){
+            mid=(left+right)/2;
+            if(mid>x/mid){
+                right=mid-1;
+            }else {
+                if((mid+1)>x/(mid+1))return mid;
+                left=mid+1;
+            }
+        }
+    }
+```
+
+ 实在不理解为什么下面这个会超时：
+
+```java
+    public int mySqrt(int x) {
+        if(x==0) return 0;
+        int left=1;
+        int right=x;
+        int mid;
+        while (true){
+            mid=(left+right)/2;
+            if(mid*mid>x){
+                right=mid-1;
+            }else {
+                if((mid+1)*(mid+1)>x)return mid;
+                left=mid+1;
+            }
+        }
+    }
+```
+
+
+
 ### 2.4 遍历
 
 ##### [牛客网] 从尾到头打印链表
@@ -1478,6 +1740,12 @@ public ListNode getCommon(ListNode h1,ListNode h2,int num){
         }
     }
 ```
+
+##### [leetcode] 59.Spiral Matrix II
+
+这是上一题的衍生：输出一个这样的矩阵
+
+
 
 ##### [牛客网] 层次遍历
 
@@ -1605,6 +1873,20 @@ public ListNode getCommon(ListNode h1,ListNode h2,int num){
 
 
 
+#### DP
+
+这种题必须用有记忆的DFS，不然超时
+
+##### [leetcode] 062 Unique Paths
+
+##### [leetcode] 065 Unique Paths II
+
+##### [leetcode] 066 Minimum Path Sum
+
+参见[https://moluchase.github.io/2017/10/16/leetcode062/#more](https://moluchase.github.io/2017/10/16/leetcode062/#more)
+
+
+
 ## 3 方法
 
 ### 3.1 统计问题
@@ -1677,7 +1959,7 @@ A = `[3,2,1,0,4]`, return `false`.
 
 #### 4.1.1字符串字典序排序
 
-给定字符串的下一个字典排序
+给定字符串的下一个字典排序，时间复杂度为O(N)
 
 ```java
 private static String NextDictOrder(String str) {
@@ -1709,7 +1991,100 @@ private static String NextDictOrder(String str) {
     }
 ```
 
+上面是遍历所有的字典序，如果求第k个字典序可不能用这样的方法一直迭代了,在leetcode上超时，使用如下方法，时间复杂度为O(N)
 
+解释过程如下，（子问题）：
+
+say n = 4, you have {1, 2, 3, 4}
+
+If you were to list out all the permutations you have
+
+1 + (permutations of 2, 3, 4)
+2 + (permutations of 1, 3, 4)
+3 + (permutations of 1, 2, 4)
+4 + (permutations of 1, 2, 3)
+
+```java
+    /**
+     * 
+     * @param s 要求字符串
+     * @param s1 分解字符串
+     * @param k 第k个字符串
+     * @return
+     */
+    private static String theKthString(String s, String s1, int k) {
+        if(k==1) return s+s1;//k=1表明不用再分解s1了
+        int n1=Factorial(s1.length());//求s1长度的阶乘
+        int n2=n1/s1.length();//求在s1中选取一个字符后，剩下的字符串的阶乘
+        int num=0;
+        //找出应该选择哪个字符添加到s后面
+        for(int i=0;i<s1.length();i++){
+            num=(i+1)*n2;
+            if(num>=k){
+                s+=s1.charAt(i);
+                s1=s1.substring(0,i)+s1.substring(i+1,s1.length());
+                return theKthString(s,s1,k-i*n2);
+            }
+        }
+        return null;
+    }
+
+    //求阶乘
+    private static int Factorial(int length) {
+        if(length==1)return 1;
+        return length*Factorial(length-1);
+    }
+```
+
+
+
+### 4.2 合并
+
+##### [leetcode] 56. merge interval
+
+##### [leetcode] 57.Insert Interval
+
+这种线段类型的题目，最好能写个类，然后再实现
+
+```java
+class Interval {
+    int start;
+    int end;
+    Interval() { start = 0; end = 0; }
+    Interval(int s, int e) { start = s; end = e; }
+}
+```
+
+模板如下，时间复杂度为O(N)：
+
+```java
+    public List<Interval> merge(List<Interval> intervals) {
+        Collections.sort(intervals, new Comparator<Interval>() {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                if(o1.start>o2.start)return 1;
+                else if(o1.start==o2.start)return 0;
+                else return -1;
+            }
+        });
+        List<Interval> list=new ArrayList<>();
+        int start,end,i;
+        i=0;
+        while (i<intervals.size()){
+            Interval interval=intervals.get(i);
+            start=interval.start;
+            end=interval.end;
+            while (i+1<intervals.size()&&end>=intervals.get(i+1).start){
+                interval=intervals.get(i+1);
+                if(end<interval.end)end=interval.end;
+                i++;
+            }
+            list.add(new Interval(start,end));
+            i++;
+        }
+        return list;
+    }
+```
 
 
 
@@ -1769,6 +2144,15 @@ Queue<String> queue = new LinkedList<String>();//new队列
 队列中的add,remove,element方法失败时抛异常，offer,poll,peek失败则不会抛异常
 */
 ```
+
+#### ArrayList
+
+```java
+//插入元素
+list.add(2,"f")//下标，元素
+```
+
+
 
 #### PriorityQueue
 
@@ -1861,6 +2245,14 @@ equals比较的时对象的内容，==比较的时两个对象是否相等
 
 ```java
 "aaa".matches("a*a");
+```
+
+ 
+
+#### 栈的用法
+
+```java
+while (!stack.isEmpty())result="/"+stack.pop()+result;//将栈中的元素按照底部到顶部方式连接
 ```
 
 
